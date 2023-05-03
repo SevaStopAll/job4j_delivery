@@ -26,4 +26,12 @@ public class Delivery {
     @Setter
     @Getter
     private Status status;
+
+    @Setter
+    @Getter
+    private int price;
+
+    @Getter
+    @Setter
+    private String paymentMethod;
 }

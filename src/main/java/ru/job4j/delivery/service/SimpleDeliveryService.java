@@ -15,6 +15,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -29,6 +30,8 @@ public class SimpleDeliveryService implements DeliveryService {
         Delivery delivery = new Delivery();
         delivery.setAddress((String) data.get("address"));
         delivery.setStatus(statuses.findById(1).get());
+        delivery.setPrice((Integer) data.get("price"));
+        delivery.setPaymentMethod((String) data.get("payment_method"));
         log.debug(delivery.getAddress());
         deliveries.save(delivery);
     }
