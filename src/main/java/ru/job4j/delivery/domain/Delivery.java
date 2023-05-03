@@ -17,11 +17,9 @@ public class Delivery {
     @Getter
     private int id;
 
-    @ManyToOne
-    @JoinColumn(name = "customer")
     @Setter
     @Getter
-    private Customer customer;
+    private String address;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "status")

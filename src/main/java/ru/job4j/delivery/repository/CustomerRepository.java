@@ -1,7 +1,6 @@
 package ru.job4j.delivery.repository;
 
 import org.springframework.data.repository.CrudRepository;
-import ru.job4j.delivery.domain.Customer;
 
 import java.util.Collection;
 import java.util.Optional;
