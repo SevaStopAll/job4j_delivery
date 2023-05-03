@@ -3,50 +3,67 @@ package ru.job4j.delivery.service;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.kafka.annotation.KafkaListener;
+import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import ru.job4j.delivery.domain.Delivery;
-import ru.job4j.delivery.repository.CustomerRepository;
+import ru.job4j.delivery.domain.Status;
 import ru.job4j.delivery.repository.DeliveryRepository;
 import ru.job4j.delivery.repository.StatusRepository;
-import ru.job4j.delivery.service.DeliveryService;
 
-import java.time.LocalDateTime;
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.stream.Collectors;
+import java.util.Optional;
 
 @Service
 @Slf4j
 @AllArgsConstructor
 public class SimpleDeliveryService implements DeliveryService {
     private final DeliveryRepository deliveries;
-    private final CustomerRepository customers;
     private final StatusRepository statuses;
+    private final KafkaTemplate<String, Object> kafkaTemplate;
 
     @KafkaListener(topics = "delivery_service")
-    public void receiveStatus(Map<String, Integer> data) {
+    public void receiveStatus(Map data) {
         Delivery delivery = new Delivery();
-        data.put("address", orderToDeliver.getCustomer().getAddress());
-        data.put("dishes", orderToDeliver.getDishes().stream().map(dish -> dish.getId()).collect(Collectors.toList()));
-        data.put("time", LocalDateTime.now());
-        data.put("price", orderToDeliver.getPrice());
-        data.put("payment_method", orderToDeliver.getMethod().getName());
-
-        String dishes = order.get("dishes").toString();
-        kitchenOrder.setDescription(dishes);
-        kitchenOrder.setStatus(new Status(Integer.parseInt(order.get("status").toString()), "Создан"));
-        log.debug(dishes);
-        log.debug(order.get("time").toString());
-        orders.save(kitchenOrder);
+        delivery.setAddress((String) data.get("address"));
+        delivery.setStatus(statuses.findById(1).get());
+        log.debug(delivery.getAddress());
+        deliveries.save(delivery);
     }
 
     @Transactional
-    public void changeStatus(Order order) {
-        Map<String, Integer> data = new HashMap();
-        data.put("id", order.getId());
-        data.put("status", order.getStatus().getId());
-        kafkaTemplate.send("cooked_order", data);
+    public void changeStatus(Delivery delivery) {
+        Map data = new HashMap();
+        data.put("id", delivery.getId());
+        data.put("status", delivery.getStatus().getId());
+        kafkaTemplate.send("delivired_order", data);
+    }
+
+    @Override
+    public Collection<Delivery> findAll() {
+        return deliveries.findAll();
+    }
+
+    @Override
+    public Optional<Delivery> findById(int id) {
+        return deliveries.findById(id);
+    }
+
+    @Override
+    public Optional<Status> findStatusById(int statusId) {
+        return Optional.of(statuses.findById(statusId).get());
+    }
+
+    @Override
+    public boolean update(Delivery delivery) {
+        if (deliveries.findById(delivery.getId()).isEmpty()) {
+            return false;
+        }
+        deliveries.save(delivery);
+        changeStatus(delivery);
+        return true;
     }
 
 }
