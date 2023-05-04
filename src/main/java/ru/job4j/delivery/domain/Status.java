@@ -18,5 +18,5 @@ public class Status {
     private int id;
     @Setter
     @Getter
-    private String description;
+    private String name;
 }

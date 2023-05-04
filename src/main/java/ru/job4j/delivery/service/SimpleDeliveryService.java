@@ -40,7 +40,7 @@ public class SimpleDeliveryService implements DeliveryService {
         Map data = new HashMap();
         data.put("id", delivery.getId());
         data.put("status", delivery.getStatus().getId());
-        kafkaTemplate.send("delivired_order", data);
+        kafkaTemplate.send("delivered_order", data);
     }
 
     @Override
